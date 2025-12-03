@@ -7,32 +7,28 @@ body,
 #root {
   height: 100%;
 }
-/* Use San Francisco / system font stack for macOS and sensible fallbacks */
+
 body {
-  background: #ffffff;
-  color: #0f172a;
-  font-family:
-    -apple-system, 'SF Pro Text', 'SF Pro Display', 'San Francisco', 'San Francisco Text',
-    'San Francisco Display', BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* 使用我们在 config 定义的颜色和字体 */
+  @apply bg-ios-gray text-ios-text font-sans antialiased;
 }
 
-/* Custom scrollbar (light theme) */
+/* 优化滚动条：使其更细，类似 macOS 的悬浮滚动条 */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f3f4f6;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+  @apply bg-gray-300 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
 }
 
-/* react-split helpers: ensure split containers fill available height and use flex */
+/* React Split 样式优化 */
 .split,
 .react-split,
 .split > div {
@@ -43,28 +39,58 @@ body {
   display: flex;
 }
 
-/* vertical direction (stacked) */
 .split.split--vertical {
   flex-direction: column;
 }
 
-/* gutter styling used by split.js/react-split */
+/* 让分割线（Gutter）更加隐形但易于点击 
+   Apple 风格通常不喜欢粗糙的分割线
+*/
 .gutter {
-  background: #f9fafb; /* Same as bg-gray-50 */
-  background-clip: padding-box;
+  background: transparent; 
+  position: relative;
+  z-index: 10;
+  transition: background 0.2s ease;
 }
 
-.gutter.gutter-vertical {
-  height: 3px;
-  cursor: row-resize;
+/* 给分割线加一个伪元素，只有 hover 时才显示细线，保持界面干净 */
+.gutter::after {
+  content: '';
+  position: absolute;
+  background: #007AFF; /* 拖动时显示蓝色 */
+  opacity: 0;
+  transition: opacity 0.2s;
 }
 
+/* 水平分割线 */
 .gutter.gutter-horizontal {
-  width: 3px;
+  width: 10px; /* 增加点击热区，虽然视觉上是透明的 */
+  margin: 0 -5px; /* 抵消宽度，不占用布局空间 */
   cursor: col-resize;
 }
+.gutter.gutter-horizontal::after {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px; /* 视觉线宽度 */
+  transform: translateX(-50%);
+}
 
-/* Hover effect for better discoverability */
-.gutter:hover {
-  background: #e5e7eb; /* Slightly darker on hover */
+/* 垂直分割线 */
+.gutter.gutter-vertical {
+  height: 10px;
+  margin: -5px 0;
+  cursor: row-resize;
+}
+.gutter.gutter-vertical::after {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  transform: translateY(-50%);
+}
+
+.gutter:hover::after,
+.gutter:active::after {
+  opacity: 0.5; /* 鼠标放上去时显示淡淡的蓝线 */
 }

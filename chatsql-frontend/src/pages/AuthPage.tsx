@@ -3,8 +3,7 @@ import { useAuth } from '../auth/AuthContext'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 export default function AuthPage() {
-  const { isAuthenticated } = useAuth()
-  const { setAuth } = useAuth()
+  const { isAuthenticated, setAuth } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const API_BASE = 'http://127.0.0.1:8000/api/auth'
@@ -26,157 +25,122 @@ export default function AuthPage() {
     e.preventDefault()
     setErrorMsg('')
     setIsLoading(true)
-
-    // Decide which endpoint to call based on mode
     const url = mode === 'login' ? `${API_BASE}/login/` : `${API_BASE}/signup/`
-
-    console.log('=== AUTH SUBMIT ===')
-    console.log('URL =', url, 'mode =', mode)
-
     try {
       const res = await fetch(url, {
         method: 'POST',
-        credentials: 'include', // send cookies for session
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       })
-
       const data = await res.json()
-
       if (!res.ok) {
         setErrorMsg(data.error || 'Request failed')
       } else {
-        // after signup -> login
-        setAuth({
-          isAuthenticated: true,
-          username: data.username || username,
-        })
-
-        // Redirect to home page after successful auth
+        setAuth({ isAuthenticated: true, username: data.username || username })
         navigate('/')
       }
     } catch (err) {
-      setErrorMsg('Network error')
+      setErrorMsg('Network error. Please try again.')
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <div style={styles.tabs}>
+    <div className="min-h-screen w-full flex items-center justify-center bg-[#F5F5F7] p-4 font-sans text-gray-900">
+      {/* 极简背景 */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+         <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-blue-200/20 rounded-full blur-[100px]" />
+         <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-purple-200/20 rounded-full blur-[100px]" />
+      </div>
+
+      {/* 卡片：超大圆角 rounded-3xl */}
+      <div className="w-full max-w-[380px] bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/50 p-10 flex flex-col items-center relative z-10 animate-fade-in-up">
+        
+        {/* Back Button: Circle */}
+        <button
+          onClick={() => navigate('/')}
+          className="absolute top-5 left-5 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
+          title="Back to Home"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+        </button>
+
+        <h1 className="text-2xl font-bold tracking-tight mb-3 mt-4">
+          {mode === 'login' ? 'Welcome' : 'Join Us'}
+        </h1>
+        <p className="text-sm text-gray-500 mb-8 text-center">
+          {mode === 'login' ? 'Sign in to access your workspace.' : 'Create an account to get started.'}
+        </p>
+
+        {/* Switcher: 全圆角胶囊 */}
+        <div className="w-full bg-gray-100 p-1.5 rounded-full flex items-center mb-8">
           <button
-            style={{
-              ...styles.tab,
-              ...(mode === 'login' ? styles.active : {}),
-            }}
+            type="button"
             onClick={() => setMode('login')}
+            className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-full transition-all duration-200 ${
+              mode === 'login' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400 hover:text-gray-600'
+            }`}
           >
             Login
           </button>
           <button
-            style={{
-              ...styles.tab,
-              ...(mode === 'signup' ? styles.active : {}),
-            }}
+            type="button"
             onClick={() => setMode('signup')}
+            className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-full transition-all duration-200 ${
+              mode === 'signup' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400 hover:text-gray-600'
+            }`}
           >
             Sign Up
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <label style={styles.label}>
-            Username
+        <form onSubmit={handleSubmit} className="w-full space-y-5">
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-gray-500 ml-3 uppercase tracking-wide">Username</label>
+            {/* Input: 全圆角胶囊 rounded-full */}
             <input
-              style={styles.input}
+              type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-6 py-3.5 bg-gray-50 border border-gray-200 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all shadow-sm"
+              placeholder="username"
+              required
             />
-          </label>
+          </div>
 
-          <label style={styles.label}>
-            Password
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-gray-500 ml-3 uppercase tracking-wide">Password</label>
+            {/* Input: 全圆角胶囊 rounded-full */}
             <input
               type="password"
-              style={styles.input}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-6 py-3.5 bg-gray-50 border border-gray-200 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all shadow-sm"
+              placeholder="••••••••"
+              required
             />
-          </label>
+          </div>
 
-          {errorMsg && <div style={styles.error}>{errorMsg}</div>}
+          {errorMsg && (
+            <div className="text-xs font-medium text-red-500 bg-red-50 px-4 py-2 rounded-full border border-red-100 flex items-center justify-center">
+              {errorMsg}
+            </div>
+          )}
 
-          <button type="submit" style={styles.button} disabled={isLoading}>
-            {isLoading ? 'Submitting...' : mode === 'login' ? 'Login' : 'Create Account'}
+          {/* Button: 全圆角胶囊 rounded-full + 阴影 */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-4 bg-gray-900 hover:bg-black text-white font-bold rounded-full shadow-lg shadow-gray-900/20 transition-all transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed mt-4"
+          >
+            {isLoading ? 'Processing...' : mode === 'login' ? 'Sign In' : 'Create Account'}
           </button>
         </form>
       </div>
     </div>
   )
-}
-
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    minHeight: '100vh',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    background: '#f5f5f5',
-  },
-  card: {
-    width: '360px',
-    padding: '24px',
-    borderRadius: '12px',
-    background: 'white',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-  },
-  tabs: {
-    display: 'flex',
-    marginBottom: '16px',
-  },
-  tab: {
-    flex: 1,
-    padding: '8px 0',
-    border: 'none',
-    cursor: 'pointer',
-    background: 'transparent',
-    fontSize: '16px',
-    borderBottom: '2px solid transparent',
-  },
-  active: {
-    fontWeight: 'bold',
-    borderBottomColor: '#007bff',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-  },
-  label: {
-    display: 'flex',
-    flexDirection: 'column',
-    fontSize: '14px',
-    gap: '4px',
-  },
-  input: {
-    padding: '8px 10px',
-    borderRadius: '6px',
-    border: '1px solid #ccc',
-  },
-  button: {
-    padding: '10px',
-    borderRadius: '6px',
-    border: 'none',
-    background: '#007bff',
-    color: 'white',
-    cursor: 'pointer',
-    fontSize: '15px',
-    marginTop: '8px',
-  },
-  error: {
-    color: '#c0392b',
-    fontSize: '13px',
-  },
 }
