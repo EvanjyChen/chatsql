@@ -9,11 +9,14 @@ body,
 }
 
 body {
-  /* 使用我们在 config 定义的颜色和字体 */
-  @apply bg-ios-gray text-ios-text font-sans antialiased;
+  background-color: #F5F5F7; 
+  color: #1D1D1F;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "San Francisco", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* 优化滚动条：使其更细，类似 macOS 的悬浮滚动条 */
+/* 滚动条优化 */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -22,75 +25,104 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 rounded-full;
+  @apply bg-gray-300/50 rounded-full;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400;
+  @apply bg-gray-400/80;
 }
 
-/* React Split 样式优化 */
+/* React Split 基础设置 */
 .split,
 .react-split,
 .split > div {
   height: 100%;
 }
-
 .split {
   display: flex;
 }
-
 .split.split--vertical {
   flex-direction: column;
 }
 
-/* 让分割线（Gutter）更加隐形但易于点击 
-   Apple 风格通常不喜欢粗糙的分割线
-*/
+/* --- Gutter (拖拽条) 终极修复版 --- */
+
 .gutter {
-  background: transparent; 
+  background-color: transparent;
   position: relative;
-  z-index: 10;
-  transition: background 0.2s ease;
+  /* 🔴 关键：层级设为最高，防止被 Monaco Editor 遮挡 */
+  z-index: 9999 !important; 
+  flex-shrink: 0;
 }
 
-/* 给分割线加一个伪元素，只有 hover 时才显示细线，保持界面干净 */
+/* 1. 点击热区 (Hit Area) - 隐形的宽条 */
 .gutter::after {
   content: '';
   position: absolute;
-  background: #007AFF; /* 拖动时显示蓝色 */
-  opacity: 0;
-  transition: opacity 0.2s;
+  background-color: transparent; /* 平时透明 */
+  z-index: 10; /* 在视觉线之上 */
 }
 
-/* 水平分割线 */
-.gutter.gutter-horizontal {
-  width: 10px; /* 增加点击热区，虽然视觉上是透明的 */
-  margin: 0 -5px; /* 抵消宽度，不占用布局空间 */
-  cursor: col-resize;
+/* 2. 视觉线 (Visual Line) - 实际看见的细线 */
+.gutter::before {
+  content: '';
+  position: absolute;
+  background-color: transparent; /* 默认透明，保持极简 */
+  transition: background-color 0.2s ease;
+  z-index: 5;
+  pointer-events: none; /* 让鼠标事件穿透给 ::after */
 }
+
+/* 鼠标放到热区上时，视觉线变蓝 */
+.gutter:hover::before,
+.gutter:active::before {
+  background-color: #3B82F6; /* Apple Blue */
+}
+
+/* === 水平拖拽 (左右调整 Sidebar) === */
+.gutter.gutter-horizontal {
+  cursor: col-resize;
+  /* 这里的宽度由 React Split 控制，通常是 1px，我们不强制改它，依靠 ::after 溢出 */
+}
+
+/* 热区：左右各宽出 10px，总宽约 20px */
 .gutter.gutter-horizontal::after {
-  left: 50%;
   top: 0;
   bottom: 0;
-  width: 1px; /* 视觉线宽度 */
+  left: -10px; 
+  right: -10px;
+  width: auto; 
+}
+
+/* 视觉线：居中 1px */
+.gutter.gutter-horizontal::before {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
   transform: translateX(-50%);
 }
 
-/* 垂直分割线 */
+/* === 垂直拖拽 (上下调整 Editor/Result) === */
 .gutter.gutter-vertical {
-  height: 10px;
-  margin: -5px 0;
   cursor: row-resize;
 }
+
+/* 热区：上下各高出 10px，总高约 20px */
 .gutter.gutter-vertical::after {
-  top: 50%;
   left: 0;
   right: 0;
-  height: 1px;
-  transform: translateY(-50%);
+  top: -10px;
+  bottom: -10px;
+  height: auto;
 }
 
-.gutter:hover::after,
-.gutter:active::after {
-  opacity: 0.5; /* 鼠标放上去时显示淡淡的蓝线 */
+/* 视觉线：居中 1px */
+.gutter.gutter-vertical::before {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  transform: translateY(-50%);
 }

@@ -166,18 +166,18 @@ const Layout: React.FC = () => {
                 className="split h-full flex" 
                 sizes={[40, 60]} // 只有两列，分配给 Description 和 Editor
                 minSize={[200, 300]} 
-                gutterSize={1} 
+                gutterSize={2} 
                 snapOffset={30}
               >
                 <div className="h-full overflow-y-auto custom-scrollbar bg-white">
                   <ProblemDescription exercise={currentExercise} />
                 </div>
                 <div className="h-full flex flex-col min-w-0 bg-white border-l border-gray-50">
-                  <Split direction="vertical" className="split split--vertical h-full flex flex-col" sizes={[60, 40]} minSize={[100, 100]} gutterSize={1}>
+                  <Split direction="vertical" className="split split--vertical h-full flex flex-col" sizes={[60, 40]} minSize={[100, 100]} gutterSize={2}>
                     <div className="flex-1 min-h-0 bg-white relative">
                       <CodeEditor value={code} onChange={setCode} exercise={currentExercise} onExecute={setQueryResult} onSubmit={setSubmitResult} isLoading={isLoading} demoMode={demoMode} />
                     </div>
-                    <div className="flex-1 min-h-0 bg-gray-50 border-t border-gray-100">
+                    <div className="flex-1 min-h-0 bg-white border-t border-gray-100">
                       <ResultPanel queryResult={queryResult} submitResult={submitResult} />
                     </div>
                   </Split>
