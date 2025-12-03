@@ -2,6 +2,19 @@ import React, { useState, useRef, useEffect } from 'react'
 import { getAIResponse } from '../services/api'
 import type { Exercise } from '../types'
 
+interface Message {
+  who: 'user' | 'ai'
+  text: string
+  sql_query?: string
+  query_result?: {
+    columns: string[]
+    rows: any[][]
+    row_count: number
+  }
+  executed?: boolean
+  intent?: string
+}
+
 interface Props {
   exercise: Exercise | null
   userQuery?: string
@@ -11,7 +24,7 @@ interface Props {
 
 export default function AIChat({ exercise, userQuery, error, demoMode }: Props) {
   const [input, setInput] = useState('')
-  const [messages, setMessages] = useState<{ who: 'user' | 'ai'; text: string }[]>([])
+  const [messages, setMessages] = useState<Message[]>([])
   const [loading, setLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -29,7 +42,17 @@ export default function AIChat({ exercise, userQuery, error, demoMode }: Props) 
 
     try {
       const res = await getAIResponse(exercise.id, msg, userQuery, error, demoMode)
-      setMessages((prev) => [...prev, { who: 'ai', text: res.response }])
+      setMessages((prev) => [
+        ...prev,
+        {
+          who: 'ai',
+          text: res.response,
+          sql_query: res.sql_query,
+          query_result: res.query_result,
+          executed: res.executed,
+          intent: res.intent,
+        },
+      ])
     } catch (e) {
       setMessages((prev) => [...prev, { who: 'ai', text: 'Error contacting AI' }])
     } finally {
@@ -44,11 +67,89 @@ export default function AIChat({ exercise, userQuery, error, demoMode }: Props) 
     }
   }
 
+  const renderQueryResult = (result: Message['query_result']) => {
+    if (!result || result.row_count === 0) return null
+
+    return (
+      <div className="mt-3 overflow-x-auto">
+        <table className="min-w-full text-xs border border-gray-300 rounded">
+          <thead className="bg-gray-50">
+            <tr>
+              {result.columns.map((col, i) => (
+                <th key={i} className="px-3 py-2 text-left font-medium text-gray-700 border-b">
+                  {col}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {result.rows.slice(0, 5).map((row, i) => (
+              <tr key={i} className="border-b border-gray-200">
+                {row.map((cell, j) => (
+                  <td key={j} className="px-3 py-2 text-gray-900">
+                    {cell === null ? (
+                      <span className="text-gray-400 italic">null</span>
+                    ) : (
+                      String(cell)
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {result.row_count > 5 && (
+          <p className="text-xs text-gray-500 mt-1">Showing 5 of {result.row_count} rows</p>
+        )}
+      </div>
+    )
+  }
+
+  const renderMessage = (m: Message, i: number) => {
+    if (m.who === 'user') {
+      return (
+        <div key={i} className="flex justify-end">
+          <div className="max-w-[80%] px-4 py-3 rounded-xl bg-blue-600 text-white">
+            <p className="text-sm whitespace-pre-wrap break-words">{m.text}</p>
+          </div>
+        </div>
+      )
+    }
+
+    // AI message
+    return (
+      <div key={i} className="flex justify-start">
+        <div className="max-w-[85%] bg-gray-100 text-gray-900 px-4 py-3 rounded-xl">
+          {/* Main response text */}
+          <p className="text-sm whitespace-pre-wrap break-words">{m.text}</p>
+
+          {/* SQL Query display (if generated) */}
+          {m.sql_query && (
+            <div className="mt-3 bg-gray-800 text-gray-100 p-3 rounded-lg overflow-x-auto">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-mono text-gray-400">Generated SQL</span>
+                {m.executed && (
+                  <span className="text-xs bg-green-600 text-white px-2 py-0.5 rounded">
+                    ✓ Executed
+                  </span>
+                )}
+              </div>
+              <pre className="text-xs font-mono">{m.sql_query}</pre>
+            </div>
+          )}
+
+          {/* Query result table (if executed) */}
+          {m.executed && m.query_result && renderQueryResult(m.query_result)}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="h-full flex flex-col bg-white rounded-xl border border-gray-200 overflow-hidden">
       {/* Header */}
       <div className="h-14 shrink-0 px-6 border-b border-gray-200 flex items-center">
-        <h3 className="text-sm text-gray-900">AI assistant</h3>
+        <h3 className="text-sm font-medium text-gray-900">AI assistant</h3>
       </div>
 
       {/* Messages */}
@@ -58,20 +159,16 @@ export default function AIChat({ exercise, userQuery, error, demoMode }: Props) 
             <div>
               <p>No messages yet.</p>
               <p className="mt-1">Ask the AI for help with your SQL query!</p>
+              <div className="mt-4 text-xs space-y-1">
+                <p className="text-gray-500">Try asking:</p>
+                <p className="text-blue-500">"How many problems did I solve?"</p>
+                <p className="text-blue-500">"Show me my progress"</p>
+                <p className="text-blue-500">"What is a JOIN?"</p>
+              </div>
             </div>
           </div>
         ) : (
-          messages.map((m, i) => (
-            <div key={i} className={`flex ${m.who === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div
-                className={`max-w-[80%] px-4 py-3 rounded-xl ${
-                  m.who === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'
-                }`}
-              >
-                <p className="text-sm whitespace-pre-wrap break-words">{m.text}</p>
-              </div>
-            </div>
-          ))
+          messages.map(renderMessage)
         )}
         {loading && (
           <div className="flex justify-start">

@@ -11,7 +11,13 @@ const api = axios.create({
 
 // --- Mock data ---
 const mockSchemas: DatabaseSchema[] = [
-  { id: 1, name: 'employees', display_name: 'Employees DB', description: 'Demo employees schema', exercise_count: 3 }
+  {
+    id: 1,
+    name: 'employees',
+    display_name: 'Employees DB',
+    description: 'Demo employees schema',
+    exercise_count: 3,
+  },
 ]
 
 const mockExercises: Exercise[] = [
@@ -23,7 +29,7 @@ const mockExercises: Exercise[] = [
     initial_query: 'SELECT id, name, dept FROM employees',
     hints: [{ level: 1, text: 'Start with a simple SELECT' }],
     schema: { id: 1, name: 'employees', display_name: 'Employees DB', db_name: 'employees' },
-    tags: ['select', 'join']
+    tags: ['select', 'join'],
   },
   {
     id: 2,
@@ -33,7 +39,7 @@ const mockExercises: Exercise[] = [
     initial_query: 'SELECT dept, COUNT(*) FROM employees GROUP BY dept',
     hints: [],
     schema: { id: 1, name: 'employees', display_name: 'Employees DB', db_name: 'employees' },
-    tags: ['aggregate']
+    tags: ['aggregate'],
   },
   {
     id: 3,
@@ -43,14 +49,18 @@ const mockExercises: Exercise[] = [
     initial_query: 'SELECT * FROM employees',
     hints: [],
     schema: { id: 1, name: 'employees', display_name: 'Employees DB', db_name: 'employees' },
-    tags: ['window', 'join']
-  }
+    tags: ['window', 'join'],
+  },
 ]
 
 const mockQueryResult: QueryResult = {
   success: true,
   columns: ['id', 'name', 'dept'],
-  rows: [[1, 'Alice', 'Engineering'], [2, 'Bob', 'Engineering'], [3, 'Carol', 'HR']],
+  rows: [
+    [1, 'Alice', 'Engineering'],
+    [2, 'Bob', 'Engineering'],
+    [3, 'Carol', 'HR'],
+  ],
   row_count: 3,
   execution_time: 12,
 }
@@ -61,7 +71,20 @@ const mockSubmitResult: SubmitResult = {
   user_result: mockQueryResult,
 }
 
-const mockAIResponse: AIResponse = { response: 'This is a mocked AI response. Try selecting fewer columns.' }
+const mockAIResponse: AIResponse = {
+  response:
+    "Based on your question, here's what I found: You have completed 3 exercises this month. (mock data)",
+  sql_query:
+    "SELECT COUNT(*) FROM submissions WHERE user_id=1 AND status='correct' AND MONTH(created_at)=MONTH(CURRENT_DATE)",
+  query_result: {
+    success: true,
+    columns: ['count'],
+    rows: [[3]],
+    row_count: 1,
+  },
+  executed: true,
+  intent: 'data_query',
+}
 
 // --- Helpers ---
 async function tryApi<T>(fn: () => Promise<T>, fallback: T, useMock: boolean): Promise<T> {
@@ -75,45 +98,87 @@ async function tryApi<T>(fn: () => Promise<T>, fallback: T, useMock: boolean): P
 }
 
 export const getSchemas = async (useMock = false): Promise<DatabaseSchema[]> => {
-  return tryApi(async () => {
-    const r = await api.get('/schemas/')
-    return r.data
-  }, mockSchemas, useMock)
+  return tryApi(
+    async () => {
+      const r = await api.get('/schemas/')
+      return r.data
+    },
+    mockSchemas,
+    useMock
+  )
 }
 
 export const getExercises = async (useMock = false, params?: any): Promise<Exercise[]> => {
-  return tryApi(async () => {
-    const r = await api.get('/exercises/', { params })
-    return r.data
-  }, mockExercises, useMock)
+  return tryApi(
+    async () => {
+      const r = await api.get('/exercises/', { params })
+      return r.data
+    },
+    mockExercises,
+    useMock
+  )
 }
 
 export const getExercise = async (id: number, useMock = false): Promise<Exercise> => {
-  return tryApi(async () => {
-    const r = await api.get(`/exercises/${id}/`)
-    return r.data
-  }, mockExercises.find(e => e.id === id) || mockExercises[0], useMock)
+  return tryApi(
+    async () => {
+      const r = await api.get(`/exercises/${id}/`)
+      return r.data
+    },
+    mockExercises.find((e) => e.id === id) || mockExercises[0],
+    useMock
+  )
 }
 
-export const executeQuery = async (exerciseId: number, query: string, useMock = false): Promise<QueryResult> => {
-  return tryApi(async () => {
-    const r = await api.post(`/exercises/${exerciseId}/execute/`, { query })
-    return r.data
-  }, { ...mockQueryResult, rows: mockQueryResult.rows }, useMock)
+export const executeQuery = async (
+  exerciseId: number,
+  query: string,
+  useMock = false
+): Promise<QueryResult> => {
+  return tryApi(
+    async () => {
+      const r = await api.post(`/exercises/${exerciseId}/execute/`, { query })
+      return r.data
+    },
+    { ...mockQueryResult, rows: mockQueryResult.rows },
+    useMock
+  )
 }
 
-export const submitQuery = async (exerciseId: number, query: string, useMock = false): Promise<SubmitResult> => {
-  return tryApi(async () => {
-    const r = await api.post(`/exercises/${exerciseId}/submit/`, { query })
-    return r.data
-  }, mockSubmitResult, useMock)
+export const submitQuery = async (
+  exerciseId: number,
+  query: string,
+  useMock = false
+): Promise<SubmitResult> => {
+  return tryApi(
+    async () => {
+      const r = await api.post(`/exercises/${exerciseId}/submit/`, { query })
+      return r.data
+    },
+    mockSubmitResult,
+    useMock
+  )
 }
 
-export const getAIResponse = async (exerciseId: number, message: string, userQuery?: string, error?: string, useMock = false): Promise<AIResponse> => {
-  return tryApi(async () => {
-    const r = await api.post(`/exercises/${exerciseId}/ai/`, { message, user_query: userQuery, error })
-    return r.data
-  }, mockAIResponse, useMock)
+export const getAIResponse = async (
+  exerciseId: number,
+  message: string,
+  userQuery?: string,
+  error?: string,
+  useMock = false
+): Promise<AIResponse> => {
+  return tryApi(
+    async () => {
+      const r = await api.post(`/exercises/${exerciseId}/ai/`, {
+        message,
+        user_query: userQuery,
+        error,
+      })
+      return r.data
+    },
+    mockAIResponse,
+    useMock
+  )
 }
 
 export default api

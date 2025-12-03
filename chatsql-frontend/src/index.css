@@ -2,52 +2,69 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body, #root { height: 100%; }
+html,
+body,
+#root {
+  height: 100%;
+}
 /* Use San Francisco / system font stack for macOS and sensible fallbacks */
 body {
   background: #ffffff;
   color: #0f172a;
-  font-family: -apple-system, "SF Pro Text", "SF Pro Display", "San Francisco", "San Francisco Text", "San Francisco Display", BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family:
+    -apple-system, 'SF Pro Text', 'SF Pro Display', 'San Francisco', 'San Francisco Text',
+    'San Francisco Display', BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* Custom scrollbar (light theme) */
-::-webkit-scrollbar { width: 8px; height: 8px }
-::-webkit-scrollbar-track { background: #f3f4f6 }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px }
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
 
 /* react-split helpers: ensure split containers fill available height and use flex */
-.split, .react-split, .split > div {
-	height: 100%;
+.split,
+.react-split,
+.split > div {
+  height: 100%;
 }
 
 .split {
-	display: flex;
+  display: flex;
 }
 
 /* vertical direction (stacked) */
 .split.split--vertical {
-	flex-direction: column;
+  flex-direction: column;
 }
 
 /* gutter styling used by split.js/react-split */
 .gutter {
-	background: #f9fafb; /* Same as bg-gray-50 */
-	background-clip: padding-box;
+  background: #f9fafb; /* Same as bg-gray-50 */
+  background-clip: padding-box;
 }
 
 .gutter.gutter-vertical {
-	height: 3px;
-	cursor: row-resize;
+  height: 3px;
+  cursor: row-resize;
 }
 
 .gutter.gutter-horizontal {
-	width: 3px;
-	cursor: col-resize;
+  width: 3px;
+  cursor: col-resize;
 }
 
 /* Hover effect for better discoverability */
 .gutter:hover {
-	background: #e5e7eb; /* Slightly darker on hover */
+  background: #e5e7eb; /* Slightly darker on hover */
 }

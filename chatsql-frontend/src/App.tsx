@@ -1,10 +1,10 @@
-import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import React from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
-import Layout from "./components/Layout";
-import AuthPage from "./pages/AuthPage";
-import { AuthProvider } from "./auth/AuthContext";
-import ProtectedRoute from "./auth/ProtectedRoute";
+import Layout from './components/Layout'
+import AuthPage from './pages/AuthPage'
+import { AuthProvider } from './auth/AuthContext'
+import ProtectedRoute from './auth/ProtectedRoute'
 
 export default function App() {
   return (
@@ -31,5 +31,5 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </AuthProvider>
-  );
+  )
 }

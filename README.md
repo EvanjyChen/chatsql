@@ -5,17 +5,20 @@ Interactive SQL learning platform with AI tutor assistance.
 ## Quick Start
 
 ### Prerequisites
+
 - Python 3.8+
 - Node.js 16+
 - (Optional) MySQL for production databases
 
 ### 1. Clone and Setup
+
 ```bash
 git clone https://github.com/jooguh-dev/chatsql.git
 cd chatsql
 ```
 
 ### 2. Backend Setup
+
 ```bash
 # Create virtual environment
 python -m venv venv
@@ -35,6 +38,7 @@ python manage.py runserver 8000
 ```
 
 ### 3. Frontend Setup
+
 ```bash
 # In a new terminal
 cd chatsql-frontend
@@ -67,6 +71,7 @@ npm run dev
 **Local Development (default):** Uses SQLite, no additional setup required.
 
 **Production MySQL:** Set these in `.env`:
+
 ```bash
 DB_NAME=your_database
 DB_USER=your_user
@@ -79,6 +84,7 @@ DB_HOST=your_host
 **Mock (default):** Returns static responses, no API costs.
 
 **Real OpenAI:** Set in `.env`:
+
 ```bash
 OPENAI_MODE=real
 OPENAI_API_KEY=your_key_here
@@ -92,7 +98,8 @@ OPENAI_API_KEY=your_key_here
 
 ## Troubleshooting
 
-**CSS not loading:** 
+**CSS not loading:**
+
 ```bash
 cd chatsql-frontend
 rm -rf node_modules .vite
@@ -102,4 +109,4 @@ npm run dev
 
 **CORS errors:** Check `CORS_ALLOWED_ORIGINS` in `settings.py` matches frontend port.
 
-**Port conflicts:** Frontend defaults to 3001, backend to 8000. Change in `vite.config.ts` and restart.
+**Port conflicts:** Frontend defaults to 3000, backend to 8000. Change in `vite.config.ts` and restart.
