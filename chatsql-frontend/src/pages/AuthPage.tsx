@@ -16,16 +16,18 @@ export default function AuthPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      const from = (location.state as any)?.from?.pathname || '/'
-      navigate(from, { replace: true })
+      // 不要在这里跳转，让 handleSubmit 里的逻辑处理
+      // 注释掉或删除这段
     }
   }, [isAuthenticated, navigate, location])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorMsg('')
     setIsLoading(true)
+
     const url = mode === 'login' ? `${API_BASE}/login/` : `${API_BASE}/signup/`
+
     try {
       const res = await fetch(url, {
         method: 'POST',
@@ -33,12 +35,30 @@ export default function AuthPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       })
+
       const data = await res.json()
+
       if (!res.ok) {
         setErrorMsg(data.error || 'Request failed')
       } else {
-        setAuth({ isAuthenticated: true, username: data.username || username })
-        navigate('/')
+        // 1. 获取角色 (默认 fallback 为 student)
+        const userRole = data.role || 'student' 
+
+        // 2. 更新 Context 状态
+        setAuth({
+          isAuthenticated: true,
+          username: data.username || username,
+          role: userRole, // 🟢 关键：把角色存入 Context
+        })
+
+        // 3. 🟢 关键：根据角色分流跳转
+        if (userRole === 'instructor') {
+          console.log('Redirecting to Instructor Dashboard...')
+          navigate('/instructor')
+        } else {
+          console.log('Redirecting to Student Workspace...')
+          navigate('/')
+        }
       }
     } catch (err) {
       setErrorMsg('Network error. Please try again.')

@@ -73,3 +73,26 @@ class ChatHistory(models.Model):
     class Meta:
         db_table = 'chat_history'
         ordering = ['-created_at']
+
+class Submission(models.Model):
+    """Track student submissions"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('correct', 'Correct'),
+        ('incorrect', 'Incorrect'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='submissions')
+    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE, related_name='submissions')
+    query = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    execution_time = models.FloatField(null=True, blank=True, help_text='Query execution time in seconds')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.exercise.title} - {self.status}"
+    
+    class Meta:
+        db_table = 'submissions'
+        ordering = ['-created_at']

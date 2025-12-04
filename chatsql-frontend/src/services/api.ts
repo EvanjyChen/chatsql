@@ -181,4 +181,54 @@ export const getAIResponse = async (
   )
 }
 
+// Instructor APIs
+export const getInstructorStats = async () => {
+  const r = await api.get('/instructor/stats/')
+  return r.data
+}
+
+export const getInstructorStudents = async () => {
+  const r = await api.get('/instructor/students/')
+  return r.data
+}
+
+export const getInstructorRecentActivity = async () => {
+  const r = await api.get('/instructor/recent-activity/')
+  return r.data
+}
+
+export const getInstructorExercises = async () => {
+  const r = await api.get('/instructor/exercises/')
+  return r.data
+}
+
+export const createExercise = async (data: {
+  title: string
+  description: string
+  difficulty: string
+  initial_query?: string
+  answer_query: string
+  schema_id: number
+}) => {
+  const r = await api.post('/instructor/exercises/', {
+    title: data.title,
+    description: data.description,
+    difficulty: data.difficulty.toLowerCase(),
+    schema_id: data.schema_id,
+    expected_sql: data.answer_query,
+    initial_query: data.initial_query || ''
+  })
+  return r.data
+}
+
+export const updateExercise = async (id: number, data: any) => {
+  const r = await api.put(`/instructor/exercises/${id}/`, data)
+  return r.data
+}
+
+export const deleteExercise = async (id: number) => {
+  const r = await api.delete(`/instructor/exercises/${id}/`)
+  return r.data
+}
+
 export default api

@@ -5,6 +5,7 @@ import Layout from './components/Layout'
 import AuthPage from './pages/AuthPage'
 import { AuthProvider } from './auth/AuthContext'
 import ProtectedRoute from './auth/ProtectedRoute'
+import InstructorLayout from './components/InstructorLayout'
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
           {/* Public login/signup page */}
           <Route path="/auth" element={<AuthPage />} />
 
+          <Route path="/instructor" element={<InstructorLayout />} />
           {/* ProtectedRoute */}
           {/*
           <Route

@@ -1,85 +1,83 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
+// 1. 定义类型：增加了 role
 type AuthContextValue = {
   isLoading: boolean
   isAuthenticated: boolean
   username: string | null
+  role: 'student' | 'instructor' | null // 🟢 新增 role 字段
   refreshMe: () => Promise<void>
-  setAuth: (opts: { isAuthenticated: boolean; username: string | null }) => void
+  setAuth: (opts: { 
+    isAuthenticated: boolean; 
+    username: string | null; 
+    role: 'student' | 'instructor' | null 
+  }) => void
 }
 
 const API_BASE = 'http://127.0.0.1:8000/api/auth'
 
-// create context object
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-// AuthProvider
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // isLoading
   const [isLoading, setIsLoading] = useState(true)
-
-  // logged in
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-
-  // username (null if not logged in)
   const [username, setUsername] = useState<string | null>(null)
+  const [role, setRole] = useState<'student' | 'instructor' | null>(null) // 🟢 新增 role 状态
 
   const refreshMe = async () => {
     try {
-      setIsLoading(true) // ✔ ensure loading state resets
+      setIsLoading(true)
 
       const res = await fetch(`${API_BASE}/me/`, {
         method: 'GET',
-        credentials: 'include', // important for session cookie
+        credentials: 'include', // 携带 Cookie
       })
 
       if (!res.ok) {
-        // not logged in
         setIsAuthenticated(false)
         setUsername(null)
+        setRole(null)
         return
       }
 
       const data = await res.json()
 
-      // case 1: backend returns { authenticated: true/false, username: ... }
-      if (typeof data.authenticated === 'boolean') {
-        if (data.authenticated) {
-          setIsAuthenticated(true)
-          setUsername(data.username || null)
-        } else {
-          setIsAuthenticated(false)
-          setUsername(null)
-        }
-        return // stop here if backend provides `authenticated`
-      }
+      // 假设后端 /me/ 接口也会返回 { username: "...", role: "..." }
+      // 如果后端还没更新 /me/ 接口，默认 fallback 到 'student' 防止报错
+      const userRole = data.role || 'student'
 
-      // case 2: no "authenticated" field, fall back to username
-      if (data.username) {
+      if (data.username || data.authenticated) {
         setIsAuthenticated(true)
         setUsername(data.username)
+        setRole(userRole) // 🟢 恢复会话时设置 role
       } else {
         setIsAuthenticated(false)
         setUsername(null)
+        setRole(null)
       }
     } catch (err) {
-      // on error, treat as not authenticated
       setIsAuthenticated(false)
       setUsername(null)
+      setRole(null)
     } finally {
       setIsLoading(false)
     }
   }
 
-  // Run refreshMe() ONCE when the app first loads.
+  // 初始化时检查一次登录状态
   useEffect(() => {
     refreshMe()
   }, [])
 
-  // setAuth() is used right after login() or logout().
-  const setAuth = (opts: { isAuthenticated: boolean; username: string | null }) => {
+  // 登录或登出时调用
+  const setAuth = (opts: { 
+    isAuthenticated: boolean; 
+    username: string | null; 
+    role: 'student' | 'instructor' | null 
+  }) => {
     setIsAuthenticated(opts.isAuthenticated)
     setUsername(opts.username)
+    setRole(opts.role)
   }
 
   return (
@@ -88,6 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         isAuthenticated,
         username,
+        role,
         refreshMe,
         setAuth,
       }}
@@ -97,7 +96,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   )
 }
 
-// components can easily access auth state.
 export const useAuth = (): AuthContextValue => {
   const ctx = useContext(AuthContext)
   if (!ctx) {
