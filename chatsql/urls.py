@@ -8,7 +8,6 @@ from exercises.views import (
     SubmitQueryView,
 )
 from ai_tutor.views import ExerciseAIView
-from frontend.views import IndexView
 from accounts.views import (
     me,
     instructor_stats,
@@ -46,6 +45,4 @@ urlpatterns = [
     path('api/instructor/exercises/<int:exercise_id>/', instructor_exercise_detail, name='instructor-exercise-detail'),
     
     # Frontend
-    path('', IndexView.as_view(), name='index'),
-    path('', include('frontend.urls')),
 ]

@@ -24,7 +24,6 @@ INSTALLED_APPS = [
     'corsheaders',
     'exercises',
     'ai_tutor',
-    'frontend',
     'accounts',
 ]
 
